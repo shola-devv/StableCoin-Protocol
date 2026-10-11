@@ -295,4 +295,11 @@ contract DSCEngine is ReentrancyGuard {
             revert DSCEngine__TransferFailed();
         }
     }
+
+function getAccountInformation(address user) external view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) { 
+
+ (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
+}
+
+
 }
