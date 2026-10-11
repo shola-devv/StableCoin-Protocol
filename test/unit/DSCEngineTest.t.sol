@@ -16,6 +16,7 @@ contract DSCEngineTest is Test {
     HelperConfig config;
     address weth;
     address ethUsdPriceFeed;
+    address btcUsdPriceFeed;
     address public USER = makeAddr("user");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_ERC20_BALANCE = 10 ether;
@@ -23,10 +24,45 @@ contract DSCEngineTest is Test {
     function setUp() public {
         deployer = new DeployDSC();
         (dsc, dsce, config) = deployer.run();
-        (ethUsdPriceFeed,, weth,,) = config.activeNetworkConfig();
+        (ethUsdPriceFeed, btcUsdPriceFeed, weth,,) = config.activeNetworkConfig();
         ERC20Mock(weth).mint(USER, STARTING_ERC20_BALANCE);
     }
 
+
+//////////////////////////////
+//////constructor test///////
+/////////////////////////////
+
+
+address[] public tokenAddresses;
+address[] public priceFeedAddresses;
+
+function testRevertIfTokenLengthDosentMatchPriceFeeds() public {
+
+tokenAddresses.push(weth);
+priceFeedAddresses.push(ethUsdPriceFeed);
+priceFeedAddresses.push(btcUsdPriceFeed);
+
+vm.expectRevert(DSCEngine, DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeTheSameLength.selector);
+  new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
+
+
+}
+
+
+function testGETTokenAmountFromUsd() public {
+       uint256 usdAmount = 100 ether;
+       uint256 expectedWeth = 0.5 ether;
+       uint256 actualWeth = dsc.getTokenAmountFromUsd(weth, usdAmount);
+       assertEq(expectedWeth, actualWeth);
+
+}
+
+
+
+ //////////////////////////////
+ //////Test pricefeeds/////
+/////////////////////////////
     function testGetUsdValue() public {
         uint256 ethAmount = 15e18;
 
@@ -48,6 +84,34 @@ contract DSCEngineTest is Test {
         dsce.depositCollateral(weth, 0);
         vm.stopPrank();
     }
+
+function testREvertWithUnapprovedCollateral()  public {
+       ERC20Mock  ranToken = new ERC20Mock("RAN","RAN", USER, AMOUNT_COLLATERAL);
+       vm.startPrank(USER);
+       vm.expertRevert(DSCEngine.DSCEngine__NotAllowedToken.selector);
+       dsce.depositCoLlateral(address(ranToken), AMOUNT_COLLATERAL);
+
+        
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 /*
