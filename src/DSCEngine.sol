@@ -49,9 +49,10 @@ contract DSCEngine is ReentrancyGuard {
     //////// Events ///////////
     ///////////////////////////
     event collateralDeposited(address indexed user, address indexed token, uint256 indexed amount);
-    event collateralRedeemed( address indexed redeemedFrom, address indexed addressRedeemedTo, address indexed token, uint256 amount);
-     
- 
+    event collateralRedeemed(
+        address indexed redeemedFrom, address indexed addressRedeemedTo, address indexed token, uint256 amount
+    );
+
     ////////////////////////////
     ////////Modifier ///////////
     ////////////////////////////
@@ -73,6 +74,7 @@ contract DSCEngine is ReentrancyGuard {
     ///////////////////////////
     ///functions//
     ///////////////
+    //come back to check tests for constructor
     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
         if (tokenAddresses.length != priceFeedAddresses.length) {
             revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeTheSameLength();
@@ -120,9 +122,7 @@ contract DSCEngine is ReentrancyGuard {
     function redeemCollateralForDSC(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToBurn)
         external
     {
-       _burnDsc(amountDscToBurn, msg.sender, msg.sender);
-        
-
+        _burnDsc(amountDscToBurn, msg.sender, msg.sender);
 
         redeemCollateral(tokenCollateralAddress, amountCollateral);
         //redeem collateral already checks health factor
@@ -173,9 +173,8 @@ contract DSCEngine is ReentrancyGuard {
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
         uint256 totalColateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
 
-        _redeemCollateral( collateral, totalColateralToRedeem, user, msg.sender);
+        _redeemCollateral(collateral, totalColateralToRedeem, user, msg.sender);
         //we have to burn the DSC
-
 
         _burnDsc(debtToCover, user, msg.sender);
 
@@ -197,7 +196,6 @@ contract DSCEngine is ReentrancyGuard {
     function getHealthFactor() external view returns (uint256) {
         return _healthFactor(msg.sender);
     }
-
 
     /////////////////////////////////////////
     //private and internal view functions////
@@ -273,17 +271,16 @@ contract DSCEngine is ReentrancyGuard {
     * level internal function, do mot call excepr function calling had checked health factor
 
       */
+      //check if its addres(this) or dscFRO,
 
-    function _burnDsc(uint256 amountOfDscToBurn, address onBehalfOf, address dscFrom) private view {
+    function _burnDsc(uint256 amountOfDscToBurn, address onBehalfOf, address dscFrom) private  {
         s_DSCMinted[onBehalfOf] -= amountOfDscToBurn;
-        bool success = i_dsc.transferFrom(msg.sender, address(this), amountOfDscToBurn);
+        bool success = i_dsc.transferFrom(msg.sender, dscFrom , amountOfDscToBurn);
         if (!success) {
             revert DSCEngine__TransferFailed();
         }
         i_dsc.burn(amountOfDscToBurn);
     }
-  
-
 
     function _redeemCollateral(address tokenCollateralAddress, uint256 amountCollateral, address from, address to)
         private
@@ -296,10 +293,11 @@ contract DSCEngine is ReentrancyGuard {
         }
     }
 
-function getAccountInformation(address user) external view returns (uint256 totalDscMinted, uint256 collateralValueInUsd) { 
-
- (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
-}
-
-
+    function getAccountInformation(address user)
+        external
+        view
+        returns (uint256 totalDscMinted, uint256 collateralValueInUsd)
+    {
+        (totalDscMinted, collateralValueInUsd) = _getAccountInformation(user);
+    }
 }
