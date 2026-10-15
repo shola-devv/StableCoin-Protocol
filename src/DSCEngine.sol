@@ -167,7 +167,6 @@ contract DSCEngine is ReentrancyGuard {
         if (startingUserHealthFactor > MIN_HEALTH_FACTOR) {
             revert DSCEngine__healthFactorOkay();
         }
-
         uint256 tokenAmountFromDebtCovered = getTokenAmountFromUsd(collateral, debtToCover);
 
         uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
@@ -190,7 +189,7 @@ contract DSCEngine is ReentrancyGuard {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
         (s_priceFeeds[token]);
         (, int256 price,,,) = priceFeed.latestRoundData();
-        return ((usdAmountInWei * PRECISION) / uint256(price)) / ADDITIONAL_FEED_PRECISION;
+        return ((usdAmountInWei * PRECISION) / uint256(price) / ADDITIONAL_FEED_PRECISION);
     }
 
     function getHealthFactor() external view returns (uint256) {

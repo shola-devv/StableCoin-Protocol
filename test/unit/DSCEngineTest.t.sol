@@ -20,6 +20,16 @@ contract DSCEngineTest is Test {
     address public USER = makeAddr("user");
     uint256 public constant AMOUNT_COLLATERAL = 10 ether;
     uint256 public constant STARTING_ERC20_BALANCE = 10 ether;
+    uint256 public constant AMOUNT_DSC_TO_BURN = 6;
+
+
+event collateralRedeemed(
+        address indexed redeemedFrom, address indexed addressRedeemedTo, address indexed token, uint256 amount
+    );
+
+
+
+
 
     function setUp() public {
         deployer = new DeployDSC();
@@ -44,9 +54,9 @@ contract DSCEngineTest is Test {
         new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
     }
 
-    function testGETTokenAmountFromUsd() public {
+    function testGetTokenAmountFromUsd() public {
         uint256 usdAmount = 100 ether;
-        uint256 expectedWeth = 0.5 ether;
+        uint256 expectedWeth = 0.05 ether;
         uint256 actualWeth = dsce.getTokenAmountFromUsd(weth, usdAmount);
         assertEq(expectedWeth, actualWeth);
     }
@@ -101,25 +111,43 @@ contract DSCEngineTest is Test {
 
 
 
-    function testCanDepositCollateralAndGetAccountInfo() public {
+    function testCanDepositCollateralAndGetAccountInfo() public  depositedCollateral {
+   
+        vm.startPrank(USER);
         (uint256 totalDscMinted, uint256 collateralValueInUsd) = dsce.getAccountInformation(USER);
-        uint256 expectedTotalDscMinted = 0;
-        uint256 expectedDepositAmount = dsce.getTokenAmountFromUsd(weth, collateralValueInUsd);
+        uint256 expectedTotalDscMinted = 0 ether;
+        uint256 expectedDepositAmount = AMOUNT_COLLATERAL;
+        uint256 expectedUsdValue = dsce.getTokenAmountFromUsd(weth, collateralValueInUsd);
         assertEq(totalDscMinted, expectedTotalDscMinted);
         assertEq(AMOUNT_COLLATERAL, expectedDepositAmount);
+        vm.stopPrank();
     }
          // TODO:WRITE A COMPREHENSIVE DSC-ENGINE TEST
          // MAKE THE TEST COVERAGE OVER 90 PERCENT
          //test health factor is broken
 
-    function testRedeemCollateral() depositedCollateral {
-        //tokenCollateralAddress, uint256 amountCollateral
-        //emit collateralRedeemed(from, to, tokenCollateralAddress, amountCollateral);
-           
+    function testRedeemCollateral() public depositedCollateral {
+    
+        vm.startPrank(USER);
+        vm.expectEmit(true, true, true, true, address(dsce));
+        emit collateralRedeemed( USER, USER, weth, AMOUNT_COLLATERAL);
         dsce.redeemCollateral(weth, AMOUNT_COLLATERAL);
-        vm.expectEmit(true, true, false, true);
-        emit collateralRedeemed(, to, tokenCollateralAddress, amountCollateral);
-
+        vm.stopPrank();
     }
+
+
+ function testRedeemCollateralForDsc() public depositedCollateral {
+   //redeemCollateralForDSC(address tokenCollateralAddress, uint256 amountCollateral, uint256 amountDscToBurn
+    
+       vm.startPrank(USER);
+       dsce.redeemCollateralForDSC(weth, AMOUNT_COLLATERAL, AMOUNT_DSC_TO_BURN);
+        vm.expectEmit(true, true, true, true, address(dsce));
+        emit collateralRedeemed( USER, USER, weth, AMOUNT_COLLATERAL);
+        dsce.redeemCollateralForDsc(weth, AMOUNT_COLLATERAL, 100 ether);
+        vm.stopPrank();
+    }
+
+
+   
 }
 
