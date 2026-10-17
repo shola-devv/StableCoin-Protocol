@@ -251,14 +251,15 @@ contract DSCEngine is ReentrancyGuard {
         return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION;
     }
 
-    function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd) internal pure returns (uint256 ) {
-
-        if (totalDscMinted == 0 ) return type(uint256).max;
-        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_TRESHOLD) /LIQUIDATION_PRECISION;
+    function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+        internal
+        pure
+        returns (uint256)
+    {
+        if (totalDscMinted == 0) return type(uint256).max;
+        uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_TRESHOLD) / LIQUIDATION_PRECISION;
         return (collateralAdjustedForThreshold * 1e18) / totalDscMinted;
     }
-
-
 
     /*
     *@param tokenCollateralAddress The Address of the token to deposit as collateral
@@ -279,11 +280,11 @@ contract DSCEngine is ReentrancyGuard {
     * level internal function, do mot call excepr function calling had checked health factor
 
       */
-      //check if its addres(this) or dscFRO,
+    //check if its addres(this) or dscFRO,
 
-    function _burnDsc(uint256 amountOfDscToBurn, address onBehalfOf, address dscFrom) private  {
+    function _burnDsc(uint256 amountOfDscToBurn, address onBehalfOf, address dscFrom) private {
         s_DSCMinted[onBehalfOf] -= amountOfDscToBurn;
-        bool success = i_dsc.transferFrom(msg.sender, dscFrom , amountOfDscToBurn);
+        bool success = i_dsc.transferFrom(msg.sender, dscFrom, amountOfDscToBurn);
         if (!success) {
             revert DSCEngine__TransferFailed();
         }

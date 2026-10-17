@@ -125,9 +125,7 @@ contract DSCEngineTest is Test {
     function testRedeemCollateralRevertsIfHealthFactorBreaks() public {
         _depositAndMint(USER, AMOUNT_COLLATERAL, 10_000 ether);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(DSCEngine.DSCEngine_breaksHealthFactor.selector, 0.9 ether)
-        );
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine_breaksHealthFactor.selector, 0.9 ether));
         vm.prank(USER);
         dsce.redeemCollateral(weth, 1 ether);
 
@@ -156,11 +154,7 @@ contract DSCEngineTest is Test {
     function testMintDscRevertsIfHealthFactorBreaks() public {
         _depositCollateral(USER, AMOUNT_COLLATERAL);
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                DSCEngine.DSCEngine_breaksHealthFactor.selector, 999900009999000099
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(DSCEngine.DSCEngine_breaksHealthFactor.selector, 999900009999000099));
         vm.prank(USER);
         dsce.mintDSC(10_001 ether);
 
