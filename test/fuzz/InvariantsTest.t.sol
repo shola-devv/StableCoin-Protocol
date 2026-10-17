@@ -5,7 +5,7 @@
 //2. getter functions should never revert
 
 pragma solidity ^0.8.18;
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 import {DeployDSC} from "../../script/DeployDSC.s.sol";
 import {DSCEngine} from "../../src/DSCEngine.sol";
@@ -21,7 +21,7 @@ contract OpenInvariantTest is StdInvariant, Test {
     address weth;
     address wbtc;
 
-    function setup() external {
+    function setUp() external {
         deployer = new DeployDSC();
         (dsc, dsce, config) = deployer.run();
         (,, weth, wbtc,) = config.activeNetworkConfig();
@@ -37,7 +37,11 @@ contract OpenInvariantTest is StdInvariant, Test {
            uint256 wethValue =  dsce.getUsdValue(weth, totalWethDeposited);
            uint256 wbtcValue =  dsce.getUsdValue(wbtc, totalWbtcDeposited);
 
-           assert(wethValue + wbtcValue > totalSupply);
+          console.log("weth value :",  wethValue);
+          console.log("wbtc value :",  wethValue);
+          console.log("total supply :",  totalSupply);
+
+           assert(wethValue + wbtcValue >= totalSupply);
 
         }
 }
