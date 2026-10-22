@@ -5,6 +5,7 @@
 //2. getter functions should never revert
 
 pragma solidity ^0.8.18;
+
 import {Test, console} from "forge-std/Test.sol";
 import {StdInvariant} from "forge-std/StdInvariant.sol";
 import {DeployDSC} from "../../script/DeployDSC.s.sol";
@@ -13,8 +14,6 @@ import {DecentralisedStableCoin} from "../../src/DecentralisedStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Handler} from "../fuzz/Handler.t.sol";
-
-
 
 contract OpenInvariantTest is StdInvariant, Test {
     DeployDSC deployer;
@@ -36,18 +35,24 @@ contract OpenInvariantTest is StdInvariant, Test {
 
     function invariant_protocolMustHaveMoreValueThanTotalSupply() public view {
         //get the value of all the collateral in the contract and compare it to all the debt
-           uint256 totalSupply = dsc.totalSupply();
-           uint256 totalWethDeposited = IERC20(weth).balanceOf(address(dsce));
-           uint256 totalWbtcDeposited =  IERC20(wbtc).balanceOf(address(dsce));
+        uint256 totalSupply = dsc.totalSupply();
+        uint256 totalWethDeposited = IERC20(weth).balanceOf(address(dsce));
+        uint256 totalWbtcDeposited = IERC20(wbtc).balanceOf(address(dsce));
 
-           uint256 wethValue =  dsce.getUsdValue(weth, totalWethDeposited);
-           uint256 wbtcValue =  dsce.getUsdValue(wbtc, totalWbtcDeposited);
+        uint256 wethValue = dsce.getUsdValue(weth, totalWethDeposited);
+        uint256 wbtcValue = dsce.getUsdValue(wbtc, totalWbtcDeposited);
 
-          console.log("weth value :",  wethValue);
-          console.log("wbtc value :",  wethValue);
-          console.log("total supply :",  totalSupply);
+        console.log("weth value :", wethValue);
+        console.log("wbtc value :", wethValue);
+        console.log("total supply :", totalSupply);
+        console.log("timesMintIsCalled :", handler.timesMintIsCalled());
 
-           assert(wethValue + wbtcValue >= totalSupply);
+        assert(wethValue + wbtcValue >= totalSupply);
+    }
 
-        }
+    function invariant_gettersShouldNotRevert() public view {
+        //dsce.getLiquidationBonus();
+        //dsce.getTokenAmountFromUsd(address,uint256)
+        dsce.getHealthFactor();
+    }
 }

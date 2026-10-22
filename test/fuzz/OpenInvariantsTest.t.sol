@@ -1,4 +1,5 @@
 /*
+pragma solidity ^0.8.18;
 //SPDX-License-Identifier: MIT
 
 // what are the invariants
@@ -47,4 +48,4 @@ contract OpenInvariantTest is StdInvariant, Test {
         }
 }
 
-*/ 
+*/
