@@ -50,7 +50,7 @@ The system must always hold more collateral value than stablecoin supply. If a p
 ### Install
 
 ```
-git clone <your-repo-url>
+git clone https://github.com/shola-devv/StableCoin-Protocol.git 
 cd stablecoin
 forge install
 ```
